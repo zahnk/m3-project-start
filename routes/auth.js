@@ -8,56 +8,69 @@ const bcrypt = require("bcrypt");
 const bcryptSalt = 10;
 
 
-router.get("/login", (req, res, next) => {
-  res.render("auth/login", { "message": req.flash("error") });
-});
 
-router.post("/login", passport.authenticate("local", {
-  successRedirect: "/",
-  failureRedirect: "/auth/login",
-  failureFlash: true,
-  passReqToCallback: true
-}));
 
-router.get("/signup", (req, res, next) => {
-  res.render("auth/signup");
-});
-
-router.post("/signup", (req, res, next) => {
+router.post("/signup", (req, res) => {
+  const firstname = req.body.firstname;
+  const lastname = req.body.lastname;
   const username = req.body.username;
-  const password = req.body.password;
-  if (username === "" || password === "") {
-    res.render("auth/signup", { message: "Indicate username and password" });
-    return;
-  }
+  const userPassword = req.body.password;
+
 
   User.findOne({ username }, "username", (err, user) => {
     if (user !== null) {
-      res.render("auth/signup", { message: "The username already exists" });
+      console.log("User with username exists already:"+username);
+      res.status(200).json({ 'errormessage': 'this user already exists' });
       return;
     }
 
-    const salt = bcrypt.genSaltSync(bcryptSalt);
-    const hashPass = bcrypt.hashSync(password, salt);
+    const salt     = bcrypt.genSaltSync(bcryptSalt);
+    const password = bcrypt.hashSync(userPassword, salt);
 
-    const newUser = new User({
-      username,
-      password: hashPass
-    });
+    const userPassworEncrypted = {username, password, firstname, lastname};
+    console.log("User will be created:"+userPassworEncrypted);
 
-    newUser.save()
-    .then(() => {
-      res.redirect("/");
-    })
-    .catch(err => {
-      res.render("auth/signup", { message: "Something went wrong" });
-    })
+    User
+      .create(userPassworEncrypted)
+      .then((user) => {
+        res.status(200).json(user);
+      })
+      .catch(err => console.log(err));
   });
 });
 
-router.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
+
+
+router.post("/login", (req, res) => {
+  const username = req.body.username;
+  const userPassword = req.body.password;
+  User.findOne({ username }, "_id username password firstname lastname", (err, user) => {
+    if (err || !user) {
+      res.status(200).json({ errorMessage: "The username doesn't exist." });
+    } else {
+      if (bcrypt.compareSync(userPassword, user.password)) {
+        req.session.currentUser = user;
+        res.status(200).json(user);
+      } else {
+        res.status(200).json({ errorMessage: "Incorrect password." });
+      }
+    }
+  });
+});
+
+
+router.get("/logout", (req, res, next) => {
+  if (!req.session.currentUser) { 
+    res.status(200).json({ errorMessage: "logged out" }); 
+    return; 
+  }
+  req.session.destroy( err => {
+    if (err) { 
+      console.log(err); 
+    } else { 
+      res.status(200).json({ errorMessage: "logged out" }); 
+    }
+  });
 });
 
 module.exports = router;
