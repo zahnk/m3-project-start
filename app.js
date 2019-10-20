@@ -85,7 +85,7 @@ app.use('/assets', require('./routes/asset'));
 
 //redux-change
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'))
+  res.sendFile(path.join(__dirname, 'build/index.html'))
 })
 
 module.exports = app;
