@@ -11,4 +11,3 @@ npm install
 
 in the subdirectory "client":
 npm install
-
