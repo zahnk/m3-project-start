@@ -1,24 +1,62 @@
 import React, { Component } from 'react'
 import { ActionType, IAction } from '../framework/IAction';
+import { IState, IUser } from '../state/appState'
 import axios from 'axios';
 import { IWindow } from '../framework/IWindow';
+import { reducerFunctions } from '../reducer/appReducer';
 import { IUserAction } from './Register';
+import history from '../framework/history';
+
 declare let window: IWindow;
 
+export interface IErrorMessage extends IAction {
+    errorMessage: string;
+}
+
+reducerFunctions[ActionType.login_error] = function (newState: IState, action: IErrorMessage) {
+    newState.UI.waitingForResponse = false;
+    newState.UI.Login.errorMessage = action.errorMessage;
+    return newState
+}
+reducerFunctions[ActionType.user_logged_in] = function (newState: IState, action: IUserAction) {
+    newState.UI.waitingForResponse = false;
+    newState.UI.Login.errorMessage = "";
+    newState.UI.loggedIn = true;
+    newState.BM.user = action.user;
+    return newState
+}
+reducerFunctions[ActionType.user_logged_out] = function (newState: IState, action: IUserAction) {
+    newState.UI.waitingForResponse = false;
+    newState.UI.Login.errorMessage = "";
+    newState.UI.loggedIn = false;
+    newState.BM.user = {lastname:"",firstname:"",username:"",password:""};
+    return newState
+}
 
 export default class Login extends Component {
     render() {
+        if (window.CS.getUIState().loggedIn)
         return (
-            <form onSubmit={this.handleSubmit}>
-            <label htmlFor="username">Username:</label>
-            <input type="username" placeholder="Your username" onChange={this.handleUsernameChange} value={window.CS.getBMState().user.username} />
-            <br />
-            <label htmlFor="password">Password:</label>
-            <input type="password" placeholder="********" onChange={this.handlePasswordChange} value={window.CS.getBMState().user.password} />
-            <br />
-            <input type="submit" value="Login" />
-        </form>
+            <div>
+                <p>You are logged in as {window.CS.getBMState().user.username}</p>
+                <button onClick={this.handleLogout}>Logout</button>
+            </div>
+        )
+    else
+        return (
+            <div>
+                <form onSubmit={this.handleSubmit}>
+                    <label htmlFor="username">Username:</label>
+                    <input type="username" placeholder="Your username" onChange={this.handleUsernameChange} value={window.CS.getBMState().user.username} />
+                    <br />
+                    <label htmlFor="password">Password:</label>
+                    <input type="password" placeholder="********" onChange={this.handlePasswordChange} value={window.CS.getBMState().user.password} />
+                    <br />
+                    <input type="submit" value="Login" />
+                </form>
+                <p>{window.CS.getUIState().Login.errorMessage}</p>
 
+            </div>
         )
     }
 
@@ -47,15 +85,29 @@ export default class Login extends Component {
             type: ActionType.server_called
         }
         window.CS.clientAction(uiAction);
-        axios.post(window.CS.getDBServerURL() + '/signup', window.CS.getBMState().user)
+        axios.post(window.CS.getDBServerURL() + '/auth/signup', window.CS.getBMState().user)
             .then(res => {
                 const uiAction: IAction = {
                     type: ActionType.user_created
                 }
                 window.CS.clientAction(uiAction);
-
+                history.push("/showassets");
                 console.log(res.data)
             });
+    }
+
+    handleLogout() {
+        const uiAction: IAction = {
+            type: ActionType.server_called
+        }
+        window.CS.clientAction(uiAction);
+        axios.get(window.CS.getDBServerURL() + '/logout').then(res => {
+            const loggedoutAction: IAction = {
+                type: ActionType.user_logged_out
+            }
+            window.CS.clientAction(loggedoutAction);
+        }
+        );
     }
 
 

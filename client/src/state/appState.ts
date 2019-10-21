@@ -5,10 +5,22 @@ export interface IUser {
     password:string;
 }
 
+export interface ILogin{
+    errorMessage:string;
+}
+
+
 export interface IUI{
     counter: number;
     loggedIn: boolean;
     waitingForResponse:boolean;
+}
+
+export interface IUI {
+    counter: number;
+    loggedIn: boolean;
+    waitingForResponse: boolean;
+    Login: ILogin;
 }
 
 export interface IAssetData {
@@ -33,7 +45,8 @@ export const initial:IState = {
 	UI: {
 		counter: 0,
 		loggedIn: false,
-		waitingForResponse: false,
+        waitingForResponse: false,
+        Login: {errorMessage:""}
     },
 	BM: {
         user:{

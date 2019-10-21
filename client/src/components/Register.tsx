@@ -4,6 +4,8 @@ import { IState, IUser } from '../state/appState'
 import axios from 'axios';
 import { IWindow } from '../framework/IWindow';
 import { reducerFunctions } from '../reducer/appReducer';
+import history from '../framework/history';
+
 declare let window: IWindow;
 
 export interface IUserAction extends IAction {
@@ -86,11 +88,12 @@ export default class Register extends Component {
             type: ActionType.server_called
         }
         window.CS.clientAction(uiAction);
-        axios.post(window.CS.getDBServerURL() + '/signup', window.CS.getBMState().user)
+        axios.post(window.CS.getDBServerURL() + '/auth/signup', window.CS.getBMState().user)
             .then(res => {
                 const uiAction: IAction = {
                     type: ActionType.user_created
                 }
+                history.push('/');
                 window.CS.clientAction(uiAction);
 
                 console.log(res.data)
