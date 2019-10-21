@@ -85,7 +85,7 @@ export default class Login extends Component {
             type: ActionType.server_called
         }
         window.CS.clientAction(uiAction);
-        axios.post(window.CS.getDBServerURL() + '/auth/signup', window.CS.getBMState().user)
+        axios.post('/auth/signup', window.CS.getBMState().user)
             .then(res => {
                 const uiAction: IAction = {
                     type: ActionType.user_created
