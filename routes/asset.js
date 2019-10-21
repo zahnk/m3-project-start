@@ -42,8 +42,8 @@ assetRoutes.route('/:id').get(function (req, res) {
 });
 
 //U: update the asset with the given id
-
-assetRoutes.route('/update/:id').post(function (req, res) {
+// post -> put
+assetRoutes.route('/update/:id').put(function (req, res) {
     Asset.findById(req.params.id, function (err, asset) {
         if (!asset) res.status(404).send("Asset to update not found, asset _id:" + req.params.id);
         else {
@@ -62,8 +62,8 @@ assetRoutes.route('/update/:id').post(function (req, res) {
 });
 
 //D: delete the asset with the given id
-
-assetRoutes.route('/delete/:id').get(function (req, res) {
+// get -> post
+assetRoutes.route('/delete/:id').post(function (req, res) {
     Asset.findByIdAndDelete(req.params.id, function (err, asset) {
         if (!asset)
             res.status(404).send("data is not found");
