@@ -85,14 +85,24 @@ export default class Login extends Component {
             type: ActionType.server_called
         }
         window.CS.clientAction(uiAction);
-        axios.post('/auth/signup', window.CS.getBMState().user)
+        axios.post('/auth/login', window.CS.getBMState().user)
             .then(res => {
-                const uiAction: IAction = {
-                    type: ActionType.user_created
+                const data = res.data;
+                console.log(data);
+                if (data.errorMessage) {
+                    const uiAction: IErrorMessage = {
+                        type: ActionType.login_error,
+                        errorMessage: data.errorMessage
+                    }
+                    window.CS.clientAction(uiAction);
+                } else {
+                    const loggedinAction: IUserAction = {
+                        type: ActionType.user_logged_in,
+                        user: data as IUser
+                    }
+                    window.CS.clientAction(loggedinAction);
+                    history.push("/showassets");
                 }
-                window.CS.clientAction(uiAction);
-                history.push("/showassets");
-                console.log(res.data)
             });
     }
 
@@ -101,7 +111,7 @@ export default class Login extends Component {
             type: ActionType.server_called
         }
         window.CS.clientAction(uiAction);
-        axios.get('/logout').then(res => {
+        axios.get('/auth/logout').then(res => {
             const loggedoutAction: IAction = {
                 type: ActionType.user_logged_out
             }
