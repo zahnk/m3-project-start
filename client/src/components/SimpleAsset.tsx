@@ -110,7 +110,7 @@ export default class SimpleAsset extends React.PureComponent<IProps, IJSXState> 
             type: ActionType.server_called
           }
           window.CS.clientAction(uiAction);
-        axios.put(window.CS.getDBServerURL()+'/assets/update/' + this.props.asset._id, this.props.asset)
+        axios.put('/assets/update/' + this.props.asset._id, this.props.asset)
         .then(res => {
             const uiAction: IAction = {
                 type: ActionType.asset_updated
@@ -123,7 +123,7 @@ export default class SimpleAsset extends React.PureComponent<IProps, IJSXState> 
             type: ActionType.server_called
           }
           window.CS.clientAction(uiAction);
-          axios.post(window.CS.getDBServerURL()+'/assets/delete/' + this.props.asset._id)
+          axios.post('/assets/delete/' + this.props.asset._id)
           .then(res => {
             const action: IAssetAction = {
                 type: ActionType.delete_asset,
