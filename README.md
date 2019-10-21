@@ -3,7 +3,7 @@
 create ".env" file with:
 
 MONGODB_URI = mongodb://localhost/starter-app
-PORT = 3000
+PORT = 8080
 
 
 in the root directory:
